@@ -1,10 +1,16 @@
 import './style.css';
 
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
 const firebaseConfig = {
-  // your config
+  apiKey: "AIzaSyCBDPehb6y0vO1YPBYhHVYuwf-p_WMSTp4",
+  authDomain: "oceanic-gecko-374704.firebaseapp.com",
+  projectId: "oceanic-gecko-374704",
+  storageBucket: "oceanic-gecko-374704.appspot.com",
+  messagingSenderId: "460386988810",
+  appId: "1:460386988810:web:47ee5694ce03e8e74180f3",
+  measurementId: "G-Q36BWE07Q4"
 };
 
 if (!firebase.apps.length) {
@@ -13,12 +19,28 @@ if (!firebase.apps.length) {
 const firestore = firebase.firestore();
 
 const servers = {
-  iceServers: [
+  // Using From https://www.metered.ca/tools/openrelay/
+  //idk what this does lmfao. got it from https://stackoverflow.com/questions/61678514/webrtc-make-a-connection-between-two-different-devices
+  "iceServers": [
     {
-      urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+      urls: "stun:openrelay.metered.ca:80"
     },
-  ],
-  iceCandidatePoolSize: 10,
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject"
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject"
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject"
+    }
+  ]
 };
 
 // Global State
@@ -36,9 +58,8 @@ const remoteVideo = document.getElementById('remoteVideo');
 const hangupButton = document.getElementById('hangupButton');
 
 // 1. Setup media sources
-
 webcamButton.onclick = async () => {
-  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })   //fetches webcam
   remoteStream = new MediaStream();
 
   // Push tracks from local stream to peer connection
@@ -54,11 +75,13 @@ webcamButton.onclick = async () => {
   };
 
   webcamVideo.srcObject = localStream;
+  document.getElementById("webcamVideo").muted = true;    //mutes local video
   remoteVideo.srcObject = remoteStream;
 
   callButton.disabled = false;
   answerButton.disabled = false;
   webcamButton.disabled = true;
+
 };
 
 // 2. Create an offer
